@@ -763,88 +763,12 @@ def read_message(request):
     return render(request, 'read_message.html', d)
 
 
-def Search_Report(request):
-    dic = notification()
-    status = Status.objects.get(status="pending")
-    reg1 = Order.objects.filter(status=status)
-    total = 0
-    for i in reg1:
-        total += 1
-    data = Order.objects.all()
-    error = ""
-    terror = ""
-    reg = ""
-    if request.method == "POST":
-        terror = "found"
-        i = request.POST['date1']
-        n = request.POST['date2']
-        i1 = datetime.datetime.fromisoformat(i).month
-        i2 = datetime.datetime.fromisoformat(i).year
-        i3 = datetime.datetime.fromisoformat(i).day
-        n1 = datetime.datetime.fromisoformat(n).month
-        n2 = datetime.datetime.fromisoformat(n).year
-        n3 = datetime.datetime.fromisoformat(n).day
-        for j in data:
-            d1 = j.book_date.month
-            d2 = j.book_date.year
-            d3 = j.book_date.day
-            day3 = (d2 * 365) + (d1 * 30) + d3
-            day1 = (i2 * 365) + (i1 * 30) + i3
-            day2 = (n2 * 365) + (n1 * 30) + n3
-            if day3 > day1 and day3 < day2:
-                j.report_status = 'active'
-                j.save()
-            else:
-                j.report_status = 'inactive'
-                j.save()
-        reg = Order.objects.filter(report_status="active")
-        if not reg:
-            error = "notfound"
-    d = {'new': dic['new'], 'count': dic['count'], 'order': reg, 'error': error, 'terror': terror, 'reg1': reg1,
-         'total': total}
-    return render(request, 'search_report.html', d)
 
 
-def upload_notes(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    error = ""
-    user = request.user
-    serviceman = Service_Man.objects.get(user=user)
-    if request.method == "POST":
-        nf = request.FILES['notesfile']
-        try:
-            Notes.objects.create(serviceman=serviceman, notesfile=nf, uploaddate=datetime.date.today())
-            error = "no"
-        except:
-            error = "yes"
-    d = {'error': error}
-    return render(request, 'upload_notes.html', d)
 
 
-def manage_notes(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    user = request.user
-    serviceman = Service_Man.objects.get(user=user)
-    notes = Notes.objects.filter(serviceman=serviceman)
-    d = {'notes': notes}
-    return render(request, 'manage_notes.html', d)
 
 
-def delete_notes(request, pid):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    notes = Notes.objects.get(id=pid)
-    notes.delete()
-    return redirect('manage_notes')
-
-
-def view_demonotes(request, pid):
-    serviceman = Service_Man.objects.get(id=pid)
-    notes = Notes.objects.filter(serviceman=serviceman)
-    d = {'notes': notes, 'serviceman': serviceman}
-    return render(request, 'view_demonotes.html', d)
 
 
 def sendservice_feedback(request, pid):
